@@ -12,14 +12,14 @@
 /* TWI instance. */
 static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
-void openReg(uint8_t reg)
+static void openReg(uint8_t reg)
 {
 	ret_code_t err_code;
 	err_code = nrf_drv_twi_tx(&m_twi, HDC2080_ADDRESS, &reg, sizeof(reg), false); // point to specified register
 	APP_ERROR_CHECK(err_code);
 }
 
-uint8_t readReg(uint8_t reg)
+static uint8_t readReg(uint8_t reg)
 {
 	ret_code_t err_code;
 	openReg(reg);
@@ -28,7 +28,7 @@ uint8_t readReg(uint8_t reg)
 	return reading;
 }
 
-void writeReg(uint8_t reg, uint8_t data)
+static void writeReg(uint8_t reg, uint8_t data)
 {
 	ret_code_t err_code;
 	uint8_t send[2] = {reg, data};
@@ -139,7 +139,7 @@ float readTemp(void)
 	byte[0] = readReg(TEMP_LOW);
 	byte[1] = readReg(TEMP_HIGH);
 	temp = (unsigned int)byte[1] << 8 | byte[0];
-	return (float)((temp)/65536) * 165 - 40;
+	return (float)(temp) * 165 / 65536 - 40;
 }
 
 float readHumidity(void)
@@ -149,7 +149,7 @@ float readHumidity(void)
 	byte[0] = readReg(HUMID_LOW);
 	byte[1] = readReg(HUMID_HIGH);
 	humidity = (unsigned int)byte[1] << 8 | byte[0];
-	return (float)((humidity)/65536) * 100;
+	return (float)(humidity)/( 65536 )* 100;
 }
 
 /*Bit 2 of the INT_CONFIG register can be used to enable/disable
