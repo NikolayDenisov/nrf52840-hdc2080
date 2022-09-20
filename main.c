@@ -3,22 +3,30 @@
 #include "app_util_platform.h"
 #include "app_error.h"
 #include "nrf_drv_twi.h"
+#include "nrf.h"
+#include "nrf_drv_gpiote.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "hdc2080.h"
 #include "nrf_delay.h"
 
-/*TWI instance ID. */
-#
-if TWI0_ENABLED
-#define TWI_INSTANCE_ID 0# elif TWI1_ENABLED
-#define TWI_INSTANCE_ID 1# endif
+/* TWI instance ID. */
+#if TWI0_ENABLED
+#define TWI_INSTANCE_ID     0
+#elif TWI1_ENABLED
+#define TWI_INSTANCE_ID     1
+#endif
 
-/*Number of possible TWI addresses. */
-#define TWI_ADDRESSES 127
 
-/*TWI instance. */
+#define PIN_IN NRF_GPIO_PIN_MAP(0,4)
+#define PIN_OUT BSP_LED_0
+
+
+/* Number of possible TWI addresses. */
+#define TWI_ADDRESSES      127
+
+/* TWI instance. */
 static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /**
@@ -37,8 +45,38 @@ void twi_init(void)
 
 	err_code = nrf_drv_twi_init(&m_twi, &twi_config, NULL, NULL);
 	APP_ERROR_CHECK(err_code);
-	
+
 	nrf_drv_twi_enable(&m_twi);
+}
+
+void in_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+{
+	nrf_drv_gpiote_out_toggle(PIN_OUT);
+}
+
+/**
+ *@brief Function for configuring: PIN_IN pin for input, PIN_OUT pin for output,
+ *and configures GPIOTE to give an interrupt on pin change.
+ */
+static void gpio_init(void)
+{
+	ret_code_t err_code;
+
+	err_code = nrf_drv_gpiote_init();
+	APP_ERROR_CHECK(err_code);
+
+	nrf_drv_gpiote_out_config_t out_config = GPIOTE_CONFIG_OUT_SIMPLE(false);
+
+	err_code = nrf_drv_gpiote_out_init(PIN_OUT, &out_config);
+	APP_ERROR_CHECK(err_code);
+
+	nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(true);
+	in_config.pull = NRF_GPIO_PIN_PULLUP;
+
+	err_code = nrf_drv_gpiote_in_init(PIN_IN, &in_config, in_pin_handler);
+	APP_ERROR_CHECK(err_code);
+
+	nrf_drv_gpiote_in_event_enable(PIN_IN, true);
 }
 
 void sensor_init(uint8_t *addr)
@@ -48,15 +86,21 @@ void sensor_init(uint8_t *addr)
 	reset();
 	enableInterrupt();
 	enableDRDYInterrupt();
-	setInterruptPolarity(ACTIVE_HIGH);
+	setInterruptPolarity(ACTIVE_LOW);
 	setInterruptMode(LEVEL_MODE);
-	setRate(FIVE_SECONDS);
+	setRate(TEN_SECONDS);
 
 	setMeasurementMode(TEMP_AND_HUMID);
 	// Configure Measurements
 	setTempRes(FOURTEEN_BIT);
 	setHumidRes(FOURTEEN_BIT);
+	setHighTemp(40);
+	setLowTemp(-40);
+	setHighHumidity(70);
+	setLowHumidity(10);
 	nrf_delay_ms(130);
+	// Begin measuring
+	triggerMeasurement();
 }
 
 uint8_t detect_address()
@@ -65,7 +109,6 @@ uint8_t detect_address()
 	uint8_t address = 0;
 	uint8_t sample_data;
 	bool detected_device = false;
-	
 	while (!detected_device && address <= TWI_ADDRESSES)
 	{
 		address++;
@@ -77,7 +120,7 @@ uint8_t detect_address()
 			NRF_LOG_FLUSH();
 		}
 	}
-	
+
 	return address;
 }
 
@@ -89,17 +132,14 @@ int main(void)
 	uint8_t address = 0;
 	uint8_t data_ready = 0x80;
 	uint8_t status_int_register;
-
 	APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 	NRF_LOG_INFO("\r\nTWI sensor example started.");
 	NRF_LOG_FLUSH();
-
+	gpio_init();
 	twi_init();
 	address = detect_address();
 	sensor_init(&address);
-	// Begin measuring
-	triggerMeasurement();
 	while (true)
 	{
 		status_int_register = readInterruptStatus();
