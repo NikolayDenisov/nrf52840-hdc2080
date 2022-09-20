@@ -9,8 +9,10 @@
 /* TWI instance ID. */
 #define TWI_INSTANCE_ID 0
 
-/* TWI instance. */
-static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+///* TWI instance. */
+static nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+
+static uint8_t HDC2080_ADDRESS;
 
 static void openReg(uint8_t reg)
 {
@@ -139,7 +141,7 @@ float readTemp(void)
 	byte[0] = readReg(TEMP_LOW);
 	byte[1] = readReg(TEMP_HIGH);
 	temp = (unsigned int)byte[1] << 8 | byte[0];
-	return (float)(temp) * 165 / 65536 - 40;
+	return (float)(temp) * 165 / 65536 - 40.5;
 }
 
 float readHumidity(void)
@@ -332,7 +334,7 @@ void setLowTemp(float temp)
 		temp = 125;
 	}
 	// Calculate value to load into register
-	temp_thresh_low = (uint8_t)(256 * (temp + 40) / 165);
+	temp_thresh_low = (uint8_t)(256 * (temp + 40.5) / 165);
 	writeReg(TEMP_THR_L, temp_thresh_low);
 }
 
@@ -349,7 +351,7 @@ void setHighTemp(float temp)
 		temp = 125;
 	}
 	// Calculate value to load into register
-	temp_thresh_high = (uint8_t)(256 * (temp + 40) / 165);
+	temp_thresh_high = (uint8_t)(256 * (temp + 40.5) / 165);
 	writeReg(TEMP_THR_H, temp_thresh_high);
 }
 
@@ -455,4 +457,8 @@ uint16_t readDeviceId(void)
 	byte[0] = readReg(DEVICE_ID_L);
 	byte[1] = readReg(DEVICE_ID_H);
 	return (byte[1] << 8) | byte[0];
+}
+
+void hdc2080_init(uint8_t hw_address) {
+        HDC2080_ADDRESS = hw_address;
 }
