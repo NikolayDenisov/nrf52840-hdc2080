@@ -5,10 +5,9 @@
 #include <stdint.h>
 
 /* Common addresses definition for temperature sensor. */
-#define HDC2080_ADDRESS          0x40
+#define HDC2080_ADDRESS 0x40
 
-
-//Define Register Map
+// Define Register Map
 #define TEMP_LOW 0x00
 #define TEMP_HIGH 0x01
 #define HUMID_LOW 0x02
@@ -30,12 +29,12 @@
 #define DEVICE_ID_L 0xFE
 #define DEVICE_ID_H 0xFF
 
-//  Constants for setting measurement resolution
+// Constants for setting measurement resolution
 #define FOURTEEN_BIT 0
 #define ELEVEN_BIT 1
 #define NINE_BIT 2
 
-//  Constants for setting sensor mode
+// Constants for setting sensor mode
 #define TEMP_AND_HUMID 0
 #define TEMP_ONLY 1
 #define HUMID_ONLY 2
@@ -44,7 +43,7 @@
 #define LEVEL_MODE 0
 #define COMPARATOR_MODE 1
 
-//  Constants for setting sample rate
+// Constants for setting sample rate
 #define MANUAL 0
 #define TWO_MINS 1
 #define ONE_MINS 2
@@ -54,29 +53,42 @@
 #define TWO_HZ 6
 #define FIVE_HZ 7
 
-float readTemp(void);	// Returns the temperature in degrees C
-uint8_t readTempOffsetAdjust(void);	// Returns the offset adjust in binary
-uint8_t setTempOffsetAdjust(uint8_t value);	// Set and return the offset adjust in binary
-float readHumidity(void);	// Returns the relative humidity
-uint8_t readHumidityOffsetAdjust(void);	// Returns the offset adjust in binary
-uint8_t setHumidityOffsetAdjust(uint8_t value);	// Set and return the offset adjust in binary
-void enableHeater(void);	// Enables the heating element
-void disableHeater(void);	// Disables the heating element
-void setLowTemp(float temp);	// Sets low threshold temperature (in c)
-void setHighTemp(float temp);	// Sets high threshold temperature (in c)
-void setHighHumidity(float humid);	// Sets high Humiditiy threshold
-void setLowHumidity(float humid);	// Sets low Humidity threshold
-float readLowHumidityThreshold(void);	// Returns contents of low humidity threshold register
-float readHighHumidityThreshold(void);	// Returns contents of high humidity threshold register
-float readLowTempThreshold(void);	// Returns contents of low temperature threshold register (in C)
-float readHighTempThreshold(void);	// Returns contents of high temperature threshold register (in C)
-void triggerMeasurement(void);	// Triggers a manual temperature/humidity reading
-void reset(void);	// Triggers a software reset
-void enableInterrupt(void);	// Enables the interrupt/DRDY pin
-void disableInterrupt(void);	// Disables the interrupt/DRDY pin (High Z)
-uint8_t readInterruptStatus(void);	// Reads the status of the interrupt register
-void disableThresholdInterrupt(void);	// Disables high and low temperature/humidity interrupts
-void enableDRDYInterrupt(void);	// Enables data ready interrupt
-void disableDRDYInterrupt(void);	// Disables data ready interrupt
-uint16_t readManufacturerId(void);      // Reads a factory-programmable identification value that identifies this device as being manufactured by Texas Instruments.
-uint16_t readDeviceId(void);            // Reads a factory-programmable identification value that identifies this device as a HDC2080
+float read_temp(void);                 // Returns the temperature in degrees C
+uint8_t read_temp_offset_adjust(void); // Returns the offset adjust in binary
+uint8_t set_temp_offset_adjust(
+    uint8_t value);        // Set and return the offset adjust in binary
+float read_humidity(void); // Returns the relative humidity
+uint8_t
+read_humidity_offset_adjust(void); // Returns the offset adjust in binary
+uint8_t set_humidity_offset_adjust(
+    uint8_t value);             // Set and return the offset adjust in binary
+void enable_heater(void);       // Enables the heating element
+void disable_heater(void);      // Disables the heating element
+void set_low_temp(float temp);  // Sets low threshold temperature (in c)
+void set_high_temp(float temp); // Sets high threshold temperature (in c)
+void set_high_humidity(float humid); // Sets high Humiditiy threshold
+void set_low_humidity(float humid);  // Sets low Humidity threshold
+float read_low_humidity_threshold(
+    void); // Returns contents of low humidity threshold register
+float read_high_humidity_threshold(
+    void); // Returns contents of high humidity threshold register
+float read_low_temp_threshold(
+    void); // Returns contents of low temperature threshold register (in C)
+float read_high_temp_threshold(
+    void); // Returns contents of high temperature threshold register (in C)
+void trigger_measurement(
+    void);                    // Triggers a manual temperature/humidity reading
+void reset(void);             // Triggers a software reset
+void enable_interrupt(void);  // Enables the interrupt/DRDY pin
+void disable_interrupt(void); // Disables the interrupt/DRDY pin (High Z)
+uint8_t
+read_interrupt_status(void); // Reads the status of the interrupt register
+void disable_threshold_interrupt(
+    void); // Disables high and low temperature/humidity interrupts
+void enable_drdy_interrupt(void);  // Enables data ready interrupt
+void disable_drdy_interrupt(void); // Disables data ready interrupt
+uint16_t read_manufacturer_id(
+    void); // Reads a factory-programmable identification value that identifies
+           // this device as being manufactured by Texas Instruments.
+uint16_t read_device_id(void); // Reads a factory-programmable identification
+                               // value that identifies this device as a HDC2080
