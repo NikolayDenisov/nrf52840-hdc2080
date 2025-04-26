@@ -3,6 +3,7 @@
 of, the HDC2080 Temperature and Humidity Sensor.
 */
 #include "hdc2080.h"
+#include "app_error.h"
 #include "nrf_delay.h"
 #include "nrf_drv_twi.h"
 
@@ -26,6 +27,7 @@ static uint8_t read_reg(uint8_t reg) {
   open_reg(reg);
   uint8_t reading; // holds byte of read data
   err_code = nrf_drv_twi_rx(&m_twi, hdc2080_address, &reading, sizeof(reading));
+  APP_ERROR_CHECK(err_code);
   return reading;
 }
 
@@ -34,6 +36,7 @@ static void write_reg(uint8_t reg, uint8_t data) {
   uint8_t send[2] = {reg, data};
   err_code = nrf_drv_twi_tx(&m_twi, hdc2080_address, send, sizeof(send),
                             false); // point to specified register
+  APP_ERROR_CHECK(err_code);
 }
 
 void set_measurement_mode(int mode) {
@@ -398,4 +401,4 @@ uint16_t read_device_id(void) {
   return (byte[1] << 8) | byte[0];
 }
 
-void hdc2080_init(uint8_t hw_address) { HDC2080_ADDRESS = hw_address; }
+void hdc2080_init(uint8_t hw_address) { hdc2080_address = hw_address; }

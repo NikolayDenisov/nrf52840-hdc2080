@@ -92,3 +92,8 @@ uint16_t read_manufacturer_id(
            // this device as being manufactured by Texas Instruments.
 uint16_t read_device_id(void); // Reads a factory-programmable identification
                                // value that identifies this device as a HDC2080
+
+void hdc2080_init(uint8_t hw_address);
+void set_measurement_mode(int mode);
+void set_humid_res(int resolution);
+void set_temp_res(int resolution);
